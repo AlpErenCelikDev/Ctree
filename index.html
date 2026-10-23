@@ -8,8 +8,8 @@
         body {
             background-color: black;
             color: white;
-            font-family: monospace; /* Konsol görünümü verir */
-            white-space: pre;       /* Boşlukları C'deki gibi korur */
+            font-family: monospace; 
+            white-space: pre;       
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -30,53 +30,160 @@
             color: #fff;
             border: 2px solid white;
             border-radius: 10px;
+            margin-bottom: 20px;
         }
-        /* Renk Fırçalarımız (C'deki ANSI kodlarının karşılığı) */
+        
+        /* C RENK FIRÇALARI */
         .green { color: #00FF00; }
         .red { color: #FF0000; }
         .yellow { color: #FFFF00; }
         .cyan { color: #00FFFF; }
         .magenta { color: #FF00FF; }
         .brown { color: #A52A2A; }
+
+        /* SÖZLER İÇİN YENİ STİLLER (Spotify Tarzı) */
+        #lyrics-container {
+            margin-top: 40px;
+            height: 80px; /* 2 satır görünecek kadar alan (satır başı 40px) */
+            overflow: hidden;
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            font-family: 'Arial', sans-serif; /* Ağaçtan farklı, daha okunaklı modern font */
+            font-size: 22px;
+            font-weight: bold;
+            /* Üstten ve alttan silikleşme (fade) efekti */
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+        }
+        #lyrics-scroll {
+            transition: transform 0.4s ease-out; /* Pürüzsüz kayma animasyonu */
+        }
+        .lyric-line {
+            height: 40px;
+            line-height: 40px;
+            opacity: 0.2; /* Aktif olmayanlar silik ve beyaz */
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .lyric-line.active {
+            opacity: 1;
+            transform: scale(1.15); /* Aktif olan satır hafif büyür ve öne çıkar */
+            /* Renk değişimi JS içinden dinamik yapılacak */
+        }
     </style>
 </head>
 <body>
 
-    <!-- Tarayıcılar otomatik müzik çalmayı engeller, o yüzden önce butona tıklatıyoruz -->
     <button id="baslat-butonu" onclick="baslat()">Ağacı ve Müziği Başlat</button>
     
     <div id="console" style="display:none;"></div>
     
-    <!-- Senin GitHub'daki wav dosyanı buradan çekecek -->
+    <!-- YENİ: Sözlerin Görüneceği Kayan Alan -->
+    <div id="lyrics-container" style="display:none;">
+        <div id="lyrics-scroll"></div>
+    </div>
+    
+    <!-- Şarkı Dosyan -->
     <audio id="muzik" src="muzik.wav" loop></audio>
 
     <script>
-        // Butona basılınca çalışacak kod (Müziği aç, butonu gizle, ağacı çizmeye başla)
+        // ZAMANLARI SANİYEYE ÇEVİREN YARDIMCI FONKSİYON 
+        // (Senin 1.10 veya 0.055 gibi yazılarını JS'nin anlayacağı tam saniyeye çevirir)
+        function saniyeYap(zaman) {
+            let dakika = Math.floor(zaman);
+            let saniye = (zaman - dakika) * 100;
+            return (dakika * 60) + saniye;
+        }
+
+        // SÖZLER VE ZAMANLARI LİSTESİ
+        // İlk 4 satırı örnek olarak ekledim. Kendi listendeki geri kalan tüm sözleri
+        // tamamen aynı formatta kopyalayıp alt alta buraya yapıştırabilirsin.
+        const sarkisozleri = [
+            { time: saniyeYap(0.01), text: "I mean, where the fuck should I really even start?" },
+            { time: saniyeYap(0.03), text: "I got hoes that I′m keepin' in the dark" },
+            { time: saniyeYap(0.055), text: "I got my niggas ′cross the street living large" },
+            { time: saniyeYap(0.08), text: "Thinking back to the fact that they dead" },
+            // KENDİ LİSTENİN DEVAMINI BURAYA EKLE:
+            // { time: saniyeYap(0.09), text: "Thought my raps wasn't facts 'til they sat with the bars" },
+            // ...
+        ];
+
+        // Sözleri Kutuya Yerleştirme
+        const scrollKutusu = document.getElementById('lyrics-scroll');
+        sarkisozleri.forEach((satir, index) => {
+            let div = document.createElement('div');
+            div.className = 'lyric-line';
+            div.id = 'lyric-' + index;
+            div.innerText = satir.text;
+            scrollKutusu.appendChild(div);
+        });
+
+        const renkler = ['#00FF00', '#FF0000', '#FFFF00', '#00FFFF', '#FF00FF', '#1DB954']; 
+        let aktifIndex = -1;
+        const muzik = document.getElementById('muzik');
+
+        // Şarkı çalarken sürekli süreyi kontrol edip sözleri kaydıran sistem
+        muzik.addEventListener('timeupdate', () => {
+            let suAnkiZaman = muzik.currentTime;
+            
+            let yeniIndex = -1;
+            for(let i = 0; i < sarkisozleri.length; i++) {
+                if(suAnkiZaman >= sarkisozleri[i].time) {
+                    yeniIndex = i;
+                } else {
+                    break;
+                }
+            }
+
+            // Aktif satır değiştiğinde çalışır
+            if(yeniIndex !== aktifIndex && yeniIndex !== -1) {
+                // 1. Eski satırı sönükleştir
+                if(aktifIndex !== -1) {
+                    let eskiSatir = document.getElementById('lyric-' + aktifIndex);
+                    if(eskiSatir) {
+                        eskiSatir.classList.remove('active');
+                        eskiSatir.style.color = 'white'; 
+                    }
+                }
+                
+                // 2. Yeni satırı parlat, büyüt ve ağaçtaki renklerden birine boya
+                let yeniSatir = document.getElementById('lyric-' + yeniIndex);
+                if(yeniSatir) {
+                    yeniSatir.classList.add('active');
+                    let rastgeleRenk = renkler[Math.floor(Math.random() * renkler.length)];
+                    yeniSatir.style.color = rastgeleRenk;
+                }
+
+                // 3. Spotify Tarzı Kaydırma (Scroll)
+                // Kutu 80px (2 satır) olduğu için aktif satırı tam ortalamak adına hesaplama yapıyoruz
+                let kaydirmaMiktari = (yeniIndex * 40) - 20; 
+                if(kaydirmaMiktari < 0) kaydirmaMiktari = 0;
+                scrollKutusu.style.transform = `translateY(-${kaydirmaMiktari}px)`;
+                
+                aktifIndex = yeniIndex;
+            }
+        });
+
+        // BAŞLATMA FONKSİYONU
         function baslat() {
             document.getElementById('baslat-butonu').style.display = 'none';
             document.getElementById('console').style.display = 'block';
-            document.getElementById('muzik').play();
+            document.getElementById('lyrics-container').style.display = 'block'; // Sözleri görünür yap
+            muzik.play();
             
-            // Senin C'deki while(1) ve bekle(300) mantığının aynısı:
-            setInterval(tree, 300); 
+            setInterval(tree, 300); // Çam ağacı animasyonunu başlat
         }
 
-        // Senin tree() fonksiyonunun Web (JavaScript) versiyonu
+        // AĞAÇ ÇİZİM FONKSİYONU (Aynı kalıyor)
         function tree() {
             let html = "";
-            
-            // Tepe Yıldızı
             html += "               <span class='yellow'>*</span>\n";
-            
-            // Ağaç Gövdesi ve Işıklar
             for (let i = 0; i < 15; i++) {
-                for(let k = 15 - i; k > 0; k--) {
-                    html += " ";
-                }
-                
+                for(let k = 15 - i; k > 0; k--) html += " ";
                 for (let j = 1; j <= (2*i + 1); j++) {
                     let luck = Math.floor(Math.random() * 15);
-                    
                     if (luck === 0) html += "<span class='red'>*</span>";
                     else if (luck === 1) html += "<span class='yellow'>*</span>";
                     else if (luck === 2) html += "<span class='cyan'>*</span>";
@@ -85,13 +192,9 @@
                 }
                 html += "\n";
             }
-            
-            // Kahverengi Gövde
             for(let j = 0; j < 4; j++) {
                 html += "             <span class='brown'>=====</span>\n";
             }
-            
-            // Ekrana(Konsola) Bas (clean fonksiyonu gibi eskiyi silip yeniyi anında basar)
             document.getElementById('console').innerHTML = html;
         }
     </script>
