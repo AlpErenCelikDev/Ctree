@@ -1,202 +1,287 @@
 <!DOCTYPE html>
+<!--
+  Mutlu Yıllar! - kişisel eğlence amaçlı, ticari olmayan açık kaynak bir proje.
+  Şarkı sözleri (mixed) kullanıcı tarafından eklenir; kod sözleri içermez.
+-->
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mutlu Yıllar!</title>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: monospace; 
-            white-space: pre;       
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-        #console {
-            font-size: 18px;
-            line-height: 1.2;
-        }
-        #baslat-butonu {
-            padding: 15px 30px;
-            font-size: 20px;
-            cursor: pointer;
-            background-color: #333;
-            color: #fff;
-            border: 2px solid white;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        /* C RENK FIRÇALARI */
-        .green { color: #00FF00; }
-        .red { color: #FF0000; }
-        .yellow { color: #FFFF00; }
-        .cyan { color: #00FFFF; }
-        .magenta { color: #FF00FF; }
-        .brown { color: #A52A2A; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mutlu Yıllar!</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root { --pixel: 'Press Start 2P', 'Courier New', monospace; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #0b0b1a; /* düz renk */
+    color: #fff;
+    font-family: var(--pixel);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    overflow: hidden;
+    image-rendering: pixelated;
+  }
+  #kar { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  #baslat-butonu {
+    font-family: var(--pixel); font-size: 14px; padding: 18px 22px; cursor: pointer;
+    background: #e63946; color: #fff; border: 4px solid #fff; border-radius: 0;
+    box-shadow: 6px 6px 0 #000; text-transform: uppercase; z-index: 2;
+  }
+  #baslat-butonu:active { transform: translate(3px,3px); box-shadow: 3px 3px 0 #000; }
 
-        /* SÖZLER İÇİN YENİ STİLLER (Spotify Tarzı) */
-        #lyrics-container {
-            margin-top: 40px;
-            height: 80px; /* 2 satır görünecek kadar alan (satır başı 40px) */
-            overflow: hidden;
-            position: relative;
-            width: 90%;
-            max-width: 600px;
-            text-align: center;
-            font-family: 'Arial', sans-serif; /* Ağaçtan farklı, daha okunaklı modern font */
-            font-size: 22px;
-            font-weight: bold;
-            /* Üstten ve alttan silikleşme (fade) efekti */
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-        }
-        #lyrics-scroll {
-            transition: transform 0.4s ease-out; /* Pürüzsüz kayma animasyonu */
-        }
-        .lyric-line {
-            height: 40px;
-            line-height: 40px;
-            opacity: 0.2; /* Aktif olmayanlar silik ve beyaz */
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .lyric-line.active {
-            opacity: 1;
-            transform: scale(1.15); /* Aktif olan satır hafif büyür ve öne çıkar */
-            /* Renk değişimi JS içinden dinamik yapılacak */
-        }
-    </style>
+  #sahne { display: none; flex-direction: column; align-items: center; z-index: 1; width: 100%; }
+  #console {
+    white-space: pre; font-family: monospace; font-size: 18px; line-height: 1.2;
+  }
+  .green { color: #00FF00; } .red { color: #FF0000; } .yellow { color: #FFFF00; }
+  .cyan { color: #00FFFF; } .magenta { color: #FF00FF; } .brown { color: #A52A2A; }
+
+  /* SÖZLER */
+  #sozler {
+    margin-top: 22px; width: 94%; max-width: 760px; min-height: 150px;
+    text-align: center; display: flex; flex-direction: column; gap: 14px; align-items: center;
+    font-family: var(--pixel);
+  }
+  .grup { transition: opacity .25s; }
+  .grup.onceki, .grup.sonraki { opacity: .22; font-size: 9px; }
+  .grup.onceki .kelime, .grup.sonraki .kelime { color: #8a8aa0 !important; }
+  .grup.simdi { font-size: clamp(11px, 2.4vw, 17px); line-height: 1.7; }
+  .kelime {
+    display: inline-block; margin: 0 .3em; text-shadow: 3px 3px 0 #000;
+    animation: pop .25s steps(3) both;
+  }
+  @keyframes pop { from { transform: translateY(-8px) scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+  .alt-soz {
+    margin-top: 8px; font-size: 9px; color: #6c6c88; line-height: 1.6;
+    text-shadow: 2px 2px 0 #000;
+  }
+
+  /* 8-bit ilerleme çubuğu */
+  #bar-kap { margin-top: 18px; width: 80%; max-width: 480px; height: 14px; border: 3px solid #fff; background: #000; }
+  #bar { height: 100%; width: 0; background: repeating-linear-gradient(90deg,#00ff55 0 8px,#00c040 8px 10px); }
+</style>
 </head>
 <body>
 
-    <button id="baslat-butonu" onclick="baslat()">Ağacı ve Müziği Başlat</button>
-    
-    <div id="console" style="display:none;"></div>
-    
-    <!-- YENİ: Sözlerin Görüneceği Kayan Alan -->
-    <div id="lyrics-container" style="display:none;">
-        <div id="lyrics-scroll"></div>
-    </div>
-    
-    <!-- Şarkı Dosyan -->
-    <audio id="muzik" src="muzik.wav" loop></audio>
+<canvas id="kar"></canvas>
 
-    <script>
-        // ZAMANLARI SANİYEYE ÇEVİREN YARDIMCI FONKSİYON 
-        // (Senin 1.10 veya 0.055 gibi yazılarını JS'nin anlayacağı tam saniyeye çevirir)
-        function saniyeYap(zaman) {
-            let dakika = Math.floor(zaman);
-            let saniye = (zaman - dakika) * 100;
-            return (dakika * 60) + saniye;
+<button id="baslat-butonu" onclick="baslat()">&#9654; Başlat</button>
+
+<div id="sahne">
+  <div id="console"></div>
+  <div id="sozler"></div>
+  <div id="bar-kap"><div id="bar"></div></div>
+</div>
+
+<audio id="muzik" src="muzik.wav" loop></audio>
+
+<script>
+/* ======================================================================
+   0.01 I mean, where the fuck should I really even start?
+0.03 I got hoes that I′m keepin' in the dark
+0.055 I got my niggas ′cross the street living large
+0.08 Thinking back to the fact that they dead
+0.09 Thought my raps wasn't facts 'til they sat with the bars
+0.125 I got two phones, one need to charge
+0.15 Yeah, they twins, I could tell they ass apart
+0.17 I got big packs coming on the way
+0.19 I got big stacks coming out the safe (last Christmas)
+
+0.20 (Last Christmas, I gave you my heart)
+0.25 (But the very next day, you gave it away, gave it away)
+0.30 (This year, to save me from tears)
+0.34 (I′ll give it to someone special)
+
+
+0.21 I got Lil Max with me, he the wave 
+0.23 It′s a big gap between us in the game 
+0.26 In the next life, I′m tryna stay paid 
+0.28 When I die, put my money in the grave 
+   
+0.31 When I die, put my money in the grave
+0.33 I really gotta put a couple niggas in they place
+0.35 Really just lapped...
+
+0.36 I mean, where the fuck should I really even start?
+0.39 I got hoes that I′m keepin' in the dark
+0.415 I got my niggas ′cross the street living large
+0.44  Thinking back to the fact that they dead
+0.45 Thought my raps wasn't facts 'til they sat with the bars
+0.485 I got two phones, one need to charge
+0.51 Yeah, they twins, I could tell they ass apart
+0.53 I got big packs coming on the way
+0.55 I got big stacks coming out the safe (last Christmas)
+
+0.57 I got Lil Max with me, he the wave
+0.59 It′s a big gap between us in the game
+1.02 In the next life, I′m tryna stay paid
+1.04 When I die, put my money in the grave
+
+1.07 When I die, put my money in the grave
+1.09 I really gotta put a couple niggas in they place
+1.11 Really just lapped...
+
+0.56 (Last Christmas, I gave you my heart)
+1.01 (But the very next day, you gave it away, gave it away)
+1.06 (This year, to save me from tears)
+1.10 (I′ll give it to someone special)
+
+   ====================================================================== */
+const HAM_SOZLER = `
+
+`;
+
+const SARKI_SURESI = 78; // 1 dk 18 sn
+
+/* ---------- Zaman çevirici: "1.10" -> 70, "0.055" -> 5.5 ---------- */
+function zamanCevir(s) {
+  const [d, kalan = ""] = s.split(".");
+  const sn = parseInt((kalan + "00").slice(0, 2), 10);
+  const kesir = kalan.length >= 3 ? parseInt(kalan[2], 10) / 10 : 0;
+  return parseInt(d, 10) * 60 + sn + kesir;
+}
+
+/* ---------- Ham metni ayrıştır + alt sözleri doğru satıra bağla ---------- */
+function sozleriHazirla(ham) {
+  const ana = [], alt = [];
+  ham.split("\n").forEach(satir => {
+    const m = satir.match(/^\s*(\d+\.\d+)\s+(.*\S)\s*$/);
+    if (!m) return;
+    const kayit = { time: zamanCevir(m[1]), text: m[2] };
+    (kayit.text.startsWith("(") ? alt : ana).push(kayit);
+  });
+  ana.sort((a, b) => a.time - b.time);
+  const gruplar = ana.map(a => ({ time: a.time, text: a.text, sub: "" }));
+
+  alt.forEach(a => {
+    // Alt söz, kendi zamanında veya hemen sonrasında başlayan ana satıra bağlanır
+    let hedef = gruplar.find(g => g.time >= a.time - 0.001);
+    if (!hedef) hedef = gruplar[gruplar.length - 1];
+    if (!hedef) return;
+    hedef.sub += (hedef.sub ? " " : "") + a.text;
+    // Alt söz daha erken başlıyorsa grup da o zamanda açılsın
+    hedef.time = Math.min(hedef.time, a.time);
+  });
+
+  gruplar.sort((a, b) => a.time - b.time);
+  return gruplar;
+}
+
+const gruplar = sozleriHazirla(HAM_SOZLER);
+
+/* ---------- Kelime renkleri ---------- */
+const renkler = ['#ff3b3b', '#ffe600', '#00f0ff', '#ff4df0', '#00ff55', '#ff9f1c', '#9d7bff'];
+
+function grupOlustur(g, idx, durum) {
+  const kap = document.createElement('div');
+  kap.className = 'grup ' + durum;
+  const ana = document.createElement('div');
+  g.text.split(/\s+/).forEach((k, i) => {
+    const s = document.createElement('span');
+    s.className = 'kelime';
+    s.textContent = k;
+    s.style.color = renkler[(i + idx) % renkler.length];
+    if (durum === 'simdi') s.style.animationDelay = (i * 0.07) + 's';
+    ana.appendChild(s);
+  });
+  kap.appendChild(ana);
+  if (g.sub && durum === 'simdi') {
+    const a = document.createElement('div');
+    a.className = 'alt-soz';
+    a.textContent = g.sub;
+    kap.appendChild(a);
+  }
+  return kap;
+}
+
+const sozKutu = document.getElementById('sozler');
+let aktif = -2;
+
+function sozleriCiz(idx) {
+  sozKutu.innerHTML = '';
+  if (idx > 0) sozKutu.appendChild(grupOlustur(gruplar[idx - 1], idx - 1, 'onceki'));
+  if (idx >= 0) sozKutu.appendChild(grupOlustur(gruplar[idx], idx, 'simdi'));
+  const sonraki = idx + 1;
+  if (sonraki < gruplar.length) sozKutu.appendChild(grupOlustur(gruplar[sonraki], sonraki, 'sonraki'));
+}
+
+/* ---------- Müzikle senkron döngü ---------- */
+const muzik = document.getElementById('muzik');
+const bar = document.getElementById('bar');
+
+function dongu() {
+  const t = muzik.currentTime;
+  let yeni = -1;
+  for (let i = 0; i < gruplar.length; i++) {
+    if (t >= gruplar[i].time) yeni = i; else break;
+  }
+  if (yeni !== aktif) { aktif = yeni; sozleriCiz(yeni); }
+  const toplam = isFinite(muzik.duration) && muzik.duration > 0 ? muzik.duration : SARKI_SURESI;
+  bar.style.width = Math.min(100, (t / toplam) * 100) + '%';
+  requestAnimationFrame(dongu);
+}
+
+/* ---------- Başlat ---------- */
+function baslat() {
+  document.getElementById('baslat-butonu').style.display = 'none';
+  document.getElementById('sahne').style.display = 'flex';
+  muzik.play();
+  tree();
+  setInterval(tree, 300);
+  requestAnimationFrame(dongu);
+}
+
+/* ---------- Ağaç (orijinal, değiştirilmedi) ---------- */
+function tree() {
+    let html = "";
+    html += "               <span class='yellow'>*</span>\n";
+    for (let i = 0; i < 15; i++) {
+        for(let k = 15 - i; k > 0; k--) html += " ";
+        for (let j = 1; j <= (2*i + 1); j++) {
+            let luck = Math.floor(Math.random() * 15);
+            if (luck === 0) html += "<span class='red'>*</span>";
+            else if (luck === 1) html += "<span class='yellow'>*</span>";
+            else if (luck === 2) html += "<span class='cyan'>*</span>";
+            else if (luck === 3) html += "<span class='magenta'>*</span>";
+            else html += "<span class='green'>^</span>";
         }
+        html += "\n";
+    }
+    for(let j = 0; j < 4; j++) {
+        html += "             <span class='brown'>=====</span>\n";
+    }
+    document.getElementById('console').innerHTML = html;
+}
 
-        // SÖZLER VE ZAMANLARI LİSTESİ
-        // İlk 4 satırı örnek olarak ekledim. Kendi listendeki geri kalan tüm sözleri
-        // tamamen aynı formatta kopyalayıp alt alta buraya yapıştırabilirsin.
-        const sarkisozleri = [
-            { time: saniyeYap(0.01), text: "I mean, where the fuck should I really even start?" },
-            { time: saniyeYap(0.03), text: "I got hoes that I′m keepin' in the dark" },
-            { time: saniyeYap(0.055), text: "I got my niggas ′cross the street living large" },
-            { time: saniyeYap(0.08), text: "Thinking back to the fact that they dead" },
-            // KENDİ LİSTENİN DEVAMINI BURAYA EKLE:
-            // { time: saniyeYap(0.09), text: "Thought my raps wasn't facts 'til they sat with the bars" },
-            // ...
-        ];
-
-        // Sözleri Kutuya Yerleştirme
-        const scrollKutusu = document.getElementById('lyrics-scroll');
-        sarkisozleri.forEach((satir, index) => {
-            let div = document.createElement('div');
-            div.className = 'lyric-line';
-            div.id = 'lyric-' + index;
-            div.innerText = satir.text;
-            scrollKutusu.appendChild(div);
-        });
-
-        const renkler = ['#00FF00', '#FF0000', '#FFFF00', '#00FFFF', '#FF00FF', '#1DB954']; 
-        let aktifIndex = -1;
-        const muzik = document.getElementById('muzik');
-
-        // Şarkı çalarken sürekli süreyi kontrol edip sözleri kaydıran sistem
-        muzik.addEventListener('timeupdate', () => {
-            let suAnkiZaman = muzik.currentTime;
-            
-            let yeniIndex = -1;
-            for(let i = 0; i < sarkisozleri.length; i++) {
-                if(suAnkiZaman >= sarkisozleri[i].time) {
-                    yeniIndex = i;
-                } else {
-                    break;
-                }
-            }
-
-            // Aktif satır değiştiğinde çalışır
-            if(yeniIndex !== aktifIndex && yeniIndex !== -1) {
-                // 1. Eski satırı sönükleştir
-                if(aktifIndex !== -1) {
-                    let eskiSatir = document.getElementById('lyric-' + aktifIndex);
-                    if(eskiSatir) {
-                        eskiSatir.classList.remove('active');
-                        eskiSatir.style.color = 'white'; 
-                    }
-                }
-                
-                // 2. Yeni satırı parlat, büyüt ve ağaçtaki renklerden birine boya
-                let yeniSatir = document.getElementById('lyric-' + yeniIndex);
-                if(yeniSatir) {
-                    yeniSatir.classList.add('active');
-                    let rastgeleRenk = renkler[Math.floor(Math.random() * renkler.length)];
-                    yeniSatir.style.color = rastgeleRenk;
-                }
-
-                // 3. Spotify Tarzı Kaydırma (Scroll)
-                // Kutu 80px (2 satır) olduğu için aktif satırı tam ortalamak adına hesaplama yapıyoruz
-                let kaydirmaMiktari = (yeniIndex * 40) - 20; 
-                if(kaydirmaMiktari < 0) kaydirmaMiktari = 0;
-                scrollKutusu.style.transform = `translateY(-${kaydirmaMiktari}px)`;
-                
-                aktifIndex = yeniIndex;
-            }
-        });
-
-        // BAŞLATMA FONKSİYONU
-        function baslat() {
-            document.getElementById('baslat-butonu').style.display = 'none';
-            document.getElementById('console').style.display = 'block';
-            document.getElementById('lyrics-container').style.display = 'block'; // Sözleri görünür yap
-            muzik.play();
-            
-            setInterval(tree, 300); // Çam ağacı animasyonunu başlat
-        }
-
-        // AĞAÇ ÇİZİM FONKSİYONU (Aynı kalıyor)
-        function tree() {
-            let html = "";
-            html += "               <span class='yellow'>*</span>\n";
-            for (let i = 0; i < 15; i++) {
-                for(let k = 15 - i; k > 0; k--) html += " ";
-                for (let j = 1; j <= (2*i + 1); j++) {
-                    let luck = Math.floor(Math.random() * 15);
-                    if (luck === 0) html += "<span class='red'>*</span>";
-                    else if (luck === 1) html += "<span class='yellow'>*</span>";
-                    else if (luck === 2) html += "<span class='cyan'>*</span>";
-                    else if (luck === 3) html += "<span class='magenta'>*</span>";
-                    else html += "<span class='green'>^</span>";
-                }
-                html += "\n";
-            }
-            for(let j = 0; j < 4; j++) {
-                html += "             <span class='brown'>=====</span>\n";
-            }
-            document.getElementById('console').innerHTML = html;
-        }
-    </script>
+/* ---------- Kar yağışı (piksel kar taneleri) ---------- */
+const kanvas = document.getElementById('kar');
+const ctx = kanvas.getContext('2d');
+let taneler = [];
+function karBoyutla() {
+  kanvas.width = innerWidth; kanvas.height = innerHeight;
+  taneler = Array.from({ length: Math.floor(innerWidth / 12) }, () => ({
+    x: Math.random() * kanvas.width,
+    y: Math.random() * kanvas.height,
+    boy: Math.random() < 0.3 ? 6 : 3,
+    hiz: 0.6 + Math.random() * 1.4,
+    salinim: Math.random() * Math.PI * 2
+  }));
+}
+function karCiz() {
+  ctx.clearRect(0, 0, kanvas.width, kanvas.height);
+  ctx.fillStyle = '#ffffff';
+  taneler.forEach(t => {
+    t.y += t.hiz;
+    t.salinim += 0.02;
+    t.x += Math.sin(t.salinim) * 0.4;
+    if (t.y > kanvas.height) { t.y = -6; t.x = Math.random() * kanvas.width; }
+    ctx.fillRect(Math.round(t.x), Math.round(t.y), t.boy, t.boy);
+  });
+  requestAnimationFrame(karCiz);
+}
+addEventListener('resize', karBoyutla);
+karBoyutla();
+karCiz();
+</script>
 </body>
 </html>
