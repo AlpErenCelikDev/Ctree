@@ -1,8 +1,5 @@
 <!DOCTYPE html>
-<!--
-  Mutlu Yıllar! - kişisel eğlence amaçlı, ticari olmayan açık kaynak bir proje.
-  Şarkı sözleri (mixed) kullanıcı tarafından eklenir; kod sözleri içermez.
--->
+
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -93,21 +90,57 @@
 <audio id="muzik" src="muzik.wav" loop></audio>
 
 <script>
-/* ======================================================================
-   SÖZLERİ BURAYA YAPIŞTIR  (aşağıdaki kutunun içine, olduğu gibi)
 
-   ÖNEMLİ: sözleri TERS TIRNAK (`) içine koy, tek tırnak ('...') çalışmaz
-   (çok satırlı metin ve ' işareti tek tırnağı bozar).
-
-   Format:   zaman söz
-   Örnek:    0.01 Birinci satır
-             0.055 Yarım saniyeli örnek
-   Zaman = dakika.saniye  ->  1.10 = 1 dk 10 sn,  0.055 = 5,5 sn
-   Parantezle başlayan satırlar "alt söz" sayılır: otomatik olarak,
-   kendinden hemen sonra başlayan ana satırın ALTINA silik yazılır
-   ve o satırla birlikte (erken olan zamanda) görünür.
-   ====================================================================== */
 const HAM_SOZLER = `
+0.01 I mean, where the fuck should I really even start?
+0.03 I got hoes that I′m keepin' in the dark
+0.055 I got my niggas ′cross the street living large
+0.08 Thinking back to the fact that they dead
+0.09 Thought my raps wasn't facts 'til they sat with the bars
+0.125 I got two phones, one need to charge
+0.15 Yeah, they twins, I could tell they ass apart
+0.17 I got big packs coming on the way
+0.19 I got big stacks coming out the safe (last Christmas)
+
+0.20 (Last Christmas, I gave you my heart)
+0.25 (But the very next day, you gave it away, gave it away)
+0.30 (This year, to save me from tears)
+0.34 (I′ll give it to someone special)
+
+
+0.21 I got Lil Max with me, he the wave 
+0.23 It′s a big gap between us in the game 
+0.26 In the next life, I′m tryna stay paid 
+0.28 When I die, put my money in the grave 
+   
+0.31 When I die, put my money in the grave
+0.33 I really gotta put a couple niggas in they place
+0.35 Really just lapped...
+
+0.36 I mean, where the fuck should I really even start?
+0.39 I got hoes that I′m keepin' in the dark
+0.415 I got my niggas ′cross the street living large
+0.44  Thinking back to the fact that they dead
+0.45 Thought my raps wasn't facts 'til they sat with the bars
+0.485 I got two phones, one need to charge
+0.51 Yeah, they twins, I could tell they ass apart
+0.53 I got big packs coming on the way
+0.55 I got big stacks coming out the safe (last Christmas)
+
+0.57 I got Lil Max with me, he the wave
+0.59 It′s a big gap between us in the game
+1.02 In the next life, I′m tryna stay paid
+1.04 When I die, put my money in the grave
+
+1.07 When I die, put my money in the grave
+1.09 I really gotta put a couple niggas in they place
+1.11 Really just lapped...
+
+0.56 (Last Christmas, I gave you my heart)
+1.01 (But the very next day, you gave it away, gave it away)
+1.06 (This year, to save me from tears)
+1.10 (I′ll give it to someone special)
+
 
 `;
 
