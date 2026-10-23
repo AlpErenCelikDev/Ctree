@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mutlu Yıllar!</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: monospace; /* Konsol görünümü verir */
+            white-space: pre;       /* Boşlukları C'deki gibi korur */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        #console {
+            font-size: 18px;
+            line-height: 1.2;
+        }
+        #baslat-butonu {
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+            background-color: #333;
+            color: #fff;
+            border: 2px solid white;
+            border-radius: 10px;
+        }
+        /* Renk Fırçalarımız (C'deki ANSI kodlarının karşılığı) */
+        .green { color: #00FF00; }
+        .red { color: #FF0000; }
+        .yellow { color: #FFFF00; }
+        .cyan { color: #00FFFF; }
+        .magenta { color: #FF00FF; }
+        .brown { color: #A52A2A; }
+    </style>
+</head>
+<body>
+
+    <!-- Tarayıcılar otomatik müzik çalmayı engeller, o yüzden önce butona tıklatıyoruz -->
+    <button id="baslat-butonu" onclick="baslat()">Ağacı ve Müziği Başlat</button>
+    
+    <div id="console" style="display:none;"></div>
+    
+    <!-- Senin GitHub'daki wav dosyanı buradan çekecek -->
+    <audio id="muzik" src="muzik.wav" loop></audio>
+
+    <script>
+        // Butona basılınca çalışacak kod (Müziği aç, butonu gizle, ağacı çizmeye başla)
+        function baslat() {
+            document.getElementById('baslat-butonu').style.display = 'none';
+            document.getElementById('console').style.display = 'block';
+            document.getElementById('muzik').play();
+            
+            // Senin C'deki while(1) ve bekle(300) mantığının aynısı:
+            setInterval(tree, 300); 
+        }
+
+        // Senin tree() fonksiyonunun Web (JavaScript) versiyonu
+        function tree() {
+            let html = "";
+            
+            // Tepe Yıldızı
+            html += "               <span class='yellow'>*</span>\n";
+            
+            // Ağaç Gövdesi ve Işıklar
+            for (let i = 0; i < 15; i++) {
+                for(let k = 15 - i; k > 0; k--) {
+                    html += " ";
+                }
+                
+                for (let j = 1; j <= (2*i + 1); j++) {
+                    let luck = Math.floor(Math.random() * 15);
+                    
+                    if (luck === 0) html += "<span class='red'>*</span>";
+                    else if (luck === 1) html += "<span class='yellow'>*</span>";
+                    else if (luck === 2) html += "<span class='cyan'>*</span>";
+                    else if (luck === 3) html += "<span class='magenta'>*</span>";
+                    else html += "<span class='green'>^</span>";
+                }
+                html += "\n";
+            }
+            
+            // Kahverengi Gövde
+            for(let j = 0; j < 4; j++) {
+                html += "             <span class='brown'>=====</span>\n";
+            }
+            
+            // Ekrana(Konsola) Bas (clean fonksiyonu gibi eskiyi silip yeniyi anında basar)
+            document.getElementById('console').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
