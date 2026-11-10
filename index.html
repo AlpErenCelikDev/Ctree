@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -66,11 +65,42 @@
   /* 8-bit ilerleme çubuğu */
   #bar-kap { margin-top: 18px; width: 80%; max-width: 480px; height: 14px; border: 3px solid #fff; background: #000; }
   #bar { height: 100%; width: 0; background: repeating-linear-gradient(90deg,#00ff55 0 8px,#00c040 8px 10px); }
+
+  /* YENİ EKLENEN: Fare (Rat) GIF Stilleri */
+  .rat-gif {
+    position: fixed;
+    bottom: 20px;
+    width: 120px;
+    z-index: 1;
+    pointer-events: none; /* Tıklamaları engellememesi için */
+    mix-blend-mode: screen; /* Siyah arkaplanı şeffaf yapar */
+  }
+  .rat-left {
+    left: 40px;
+  }
+  .rat-right {
+    right: 40px;
+    transform: scaleX(-1); /* Sağdakini içe doğru baktırır */
+  }
+
+  /* Mobil Uyumluluk: Mobilde gifleri küçült ve kenarlara yaklaştır */
+  @media (max-width: 768px) {
+    .rat-gif {
+      width: 70px;
+      bottom: 10px;
+    }
+    .rat-left { left: 10px; }
+    .rat-right { right: 10px; }
+  }
 </style>
 </head>
 <body>
 
 <canvas id="kar"></canvas>
+
+<!-- YENİ EKLENEN: Fare GIF'leri -->
+<img src="rat-dance.jpg" class="rat-gif rat-left" alt="Dancing Rat Left">
+<img src="rat-dance.jpg" class="rat-gif rat-right" alt="Dancing Rat Right">
 
 <div id="giris">
   <p id="giris-yardim">Sözleri aşağıya yapıştır (her satır: zaman söz, ör. 0.01 ilk satır).<br>
