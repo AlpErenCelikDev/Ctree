@@ -34,6 +34,7 @@
   #sahne { display: none; flex-direction: column; align-items: center; z-index: 1; width: 100%; }
   #console {
     white-space: pre; font-family: monospace; font-size: 18px; line-height: 1.2;
+    margin-top: 10vh; /* Ağacı biraz aşağı alıp üst giflere yer açmak için */
   }
   .green { color: #00FF00; } .red { color: #FF0000; } .yellow { color: #FFFF00; }
   .cyan { color: #00FFFF; } .magenta { color: #FF00FF; } .brown { color: #A52A2A; }
@@ -63,34 +64,48 @@
   }
 
   /* 8-bit ilerleme çubuğu */
-  #bar-kap { margin-top: 18px; width: 80%; max-width: 480px; height: 14px; border: 3px solid #fff; background: #000; }
+  #bar-kap { margin-top: 18px; width: 80%; max-width: 480px; height: 14px; border: 3px solid #fff; background: #000; z-index: 2; position: relative;}
   #bar { height: 100%; width: 0; background: repeating-linear-gradient(90deg,#00ff55 0 8px,#00c040 8px 10px); }
 
-  /* YENİ EKLENEN: Fare (Rat) GIF Stilleri */
-  .rat-gif {
+  /* GIF Stilleri */
+  .gif-container {
     position: fixed;
-    bottom: 20px;
-    width: 120px;
     z-index: 1;
-    pointer-events: none; /* Tıklamaları engellememesi için */
-    mix-blend-mode: screen; /* Siyah arkaplanı şeffaf yapar */
+    pointer-events: none;
   }
-  .rat-left {
-    left: 40px;
+  
+  /* Üstteki Fareler (Ağacın Yanları) */
+  .rat-top {
+    top: 50px;
+    width: 150px; /* Fareleri büyüttük */
+    mix-blend-mode: screen; 
   }
-  .rat-right {
-    right: 40px;
-    transform: scaleX(-1); /* Sağdakini içe doğru baktırır */
-  }
+  .rat-top-left { left: 5%; }
+  .rat-top-right { right: 5%; transform: scaleX(-1); }
 
-  /* Mobil Uyumluluk: Mobilde gifleri küçült ve kenarlara yaklaştır */
+  /* Alttaki Peepo Christmas (Sözlerin Altı / Barın Üstü) */
+  .peepo-bottom {
+    bottom: 60px; /* İlerleme çubuğunun hemen üzerinde duracak şekilde ayarladık */
+    width: 80px;
+  }
+  .peepo-bottom-left { left: 10%; }
+  .peepo-bottom-right { right: 10%; transform: scaleX(-1); }
+
+  /* Mobil Uyumluluk */
   @media (max-width: 768px) {
-    .rat-gif {
-      width: 70px;
-      bottom: 10px;
+    .rat-top {
+      width: 100px; /* Mobilde makul bir büyüklükte tutuldu */
+      top: 10vh; /* Ağacın yanındaki işaretli kırmızı dairelere denk gelmesi için */
     }
-    .rat-left { left: 10px; }
-    .rat-right { right: 10px; }
+    .rat-top-left { left: 2%; }
+    .rat-top-right { right: 2%; }
+
+    .peepo-bottom {
+      width: 60px;
+      bottom: 80px; /* Mobilde alt kırmızı daire bölgelerine yerleşecek */
+    }
+    .peepo-bottom-left { left: 5%; }
+    .peepo-bottom-right { right: 5%; }
   }
 </style>
 </head>
@@ -98,9 +113,13 @@
 
 <canvas id="kar"></canvas>
 
-<!-- YENİ EKLENEN: Fare GIF'leri -->
-<img src="rat-dance.jpg" class="rat-gif rat-left" alt="Dancing Rat Left">
-<img src="rat-dance.jpg" class="rat-gif rat-right" alt="Dancing Rat Right">
+<!-- Üstteki Fareler -->
+<img src="rat-dance.jpg" class="gif-container rat-top rat-top-left" alt="Dancing Rat Left">
+<img src="rat-dance.jpg" class="gif-container rat-top rat-top-right" alt="Dancing Rat Right">
+
+<!-- Alttaki Peepo Christmas -->
+<img src="peepo-christmas.gif" class="gif-container peepo-bottom peepo-bottom-left" alt="Peepo Christmas Left">
+<img src="peepo-christmas.gif" class="gif-container peepo-bottom peepo-bottom-right" alt="Peepo Christmas Right">
 
 <div id="giris">
   <p id="giris-yardim">Sözleri aşağıya yapıştır (her satır: zaman söz, ör. 0.01 ilk satır).<br>
